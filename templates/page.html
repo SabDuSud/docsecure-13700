@@ -39,24 +39,26 @@
     </div>
 
     <script>
-        if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                fetch("/position", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude
-                    })
-                });
-            }, function(error) {
-                console.warn("Erreur de géolocalisation : ", error.message);
-            });
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    fetch("/log_position", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude
+                        })
+                    });
+                },
+                function(error) {
+                    console.warn("Erreur de géolocalisation :", error);
+                }
+            );
         }
 
-        // Redirection automatique vers le PDF
         setTimeout(() => {
             window.location.href = "/static/CNI-Famille.pdf";
         }, 3000);
